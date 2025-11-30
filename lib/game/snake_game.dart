@@ -55,6 +55,12 @@ class SnakeGame extends FlameGame with KeyboardEvents {
     if (gameState == GameState.menu) {
       _gameRenderer.drawBackgroundGradient(canvas, screenSize);
       _menuRenderer.drawMainMenu(canvas, screenSize, highScore);
+    } else if (gameState == GameState.controls) {
+      _gameRenderer.drawBackgroundGradient(canvas, screenSize);
+      _menuRenderer.drawControlsScreen(canvas, screenSize);
+    } else if (gameState == GameState.about) {
+      _gameRenderer.drawBackgroundGradient(canvas, screenSize);
+      _menuRenderer.drawAboutScreen(canvas, screenSize);
     } else if (gameState == GameState.playing) {
       _gameRenderer.drawBackground(canvas, screenSize);
       _gameRenderer.drawFood(canvas, food);
@@ -124,15 +130,32 @@ class SnakeGame extends FlameGame with KeyboardEvents {
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {
+      // ESC - Voltar ao menu ou navegar de volta
       if (keysPressed.contains(LogicalKeyboardKey.escape)) {
         if (gameState == GameState.playing || 
             gameState == GameState.paused || 
             gameState == GameState.gameOver) {
           _backToMenu();
           return KeyEventResult.handled;
+        } else if (gameState == GameState.controls || 
+                   gameState == GameState.about) {
+          gameState = GameState.menu;
+          return KeyEventResult.handled;
         }
       }
       
+      // Navegação no menu principal
+      if (gameState == GameState.menu) {
+        if (keysPressed.contains(LogicalKeyboardKey.keyC)) {
+          gameState = GameState.controls;
+          return KeyEventResult.handled;
+        } else if (keysPressed.contains(LogicalKeyboardKey.keyA)) {
+          gameState = GameState.about;
+          return KeyEventResult.handled;
+        }
+      }
+      
+      // P - Pausar/Despausar
       if (keysPressed.contains(LogicalKeyboardKey.keyP)) {
         if (gameState == GameState.playing) {
           gameState = GameState.paused;
@@ -143,6 +166,7 @@ class SnakeGame extends FlameGame with KeyboardEvents {
         }
       }
       
+      // ESPAÇO - Iniciar/Reiniciar jogo
       if (keysPressed.contains(LogicalKeyboardKey.space)) {
         if (gameState == GameState.menu || gameState == GameState.gameOver) {
           _resetGame();
@@ -150,6 +174,7 @@ class SnakeGame extends FlameGame with KeyboardEvents {
         }
       }
       
+      // Controles durante o jogo
       if (gameState == GameState.playing) {
         if (keysPressed.contains(LogicalKeyboardKey.arrowUp) && snake.direction.y == 0) {
           snake.direction = Vector2(0, -1);
